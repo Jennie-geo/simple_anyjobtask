@@ -1,0 +1,84 @@
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    Int  @id @default(autoincrement())
+  firstName String
+  lastName String
+  email String  @unique
+  password String
+  account Invite[]
+  decision Decision @default(REJECTED)
+  verifyAccount Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("users")
+}
+
+model Account {
+  id Int @id @default(autoincrement())
+  title String
+  anyTarget Target @default(YES)
+  methodofsaving SavingMethod @default (MANUAL)
+  savingfrequency SavingFrequency @default(DAILY)
+  whentoStart DateTime
+  howmuchtosave Int
+  datetostartsaving DateTime
+  savingTimeLength SAVINGTIMELENGTH @default(THREE_MONTHS)
+  startdate DateTime
+  endDate DateTime
+  relationshipWithBuddy String
+  members Invite[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Invite {
+  createdAt DateTime @default(now())
+  roles UserRole
+
+  userId Int
+  user User @relation(fields: [userId], references: [id]) 
+  accountId Int
+  account Account @relation(fields: [accountId], references: [id]) 
+
+  @@id([userId, accountId])
+}
+
+enum UserRole {
+  ISADMIN
+  USER
+}
+
+enum Decision {
+  ACCEPTED
+  REJECTED 
+}
+
+enum Target {
+ YES
+ NO
+}
+enum SavingMethod {
+  AUTOMATIC
+  MANUAL
+}
+enum SavingFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+enum SAVINGTIMELENGTH {
+THREE_MONTHS
+SIX_MONTHS
+ONE_YEAR
+}
