@@ -1,35 +1,18 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE `users` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `firstName` VARCHAR(191) NOT NULL,
+    `lastName` VARCHAR(191) NOT NULL,
+    `email` VARCHAR(191) NOT NULL,
+    `password` VARCHAR(191) NOT NULL,
+    `decision` ENUM('ACCEPTED', 'REJECTED') NOT NULL DEFAULT 'REJECTED',
+    `verifyAccount` BOOLEAN NOT NULL DEFAULT false,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
 
-  - You are about to drop the `Account` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `AccountMember` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Invite` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `_AccountToAccountMember` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE `Invite` DROP FOREIGN KEY `Invite_accountMemberId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `Invite` DROP FOREIGN KEY `Invite_userId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `_AccountToAccountMember` DROP FOREIGN KEY `_AccountToAccountMember_A_fkey`;
-
--- DropForeignKey
-ALTER TABLE `_AccountToAccountMember` DROP FOREIGN KEY `_AccountToAccountMember_B_fkey`;
-
--- DropTable
-DROP TABLE `Account`;
-
--- DropTable
-DROP TABLE `AccountMember`;
-
--- DropTable
-DROP TABLE `Invite`;
-
--- DropTable
-DROP TABLE `_AccountToAccountMember`;
+    UNIQUE INDEX `users_email_key`(`email`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `account` (
@@ -52,8 +35,9 @@ CREATE TABLE `account` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `accountMemeber` (
+CREATE TABLE `accountMember` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `userId` INTEGER NOT NULL,
     `accountId` INTEGER NOT NULL,
     `relationshipWithBuddy` VARCHAR(191) NOT NULL,
 
@@ -64,4 +48,4 @@ CREATE TABLE `accountMemeber` (
 ALTER TABLE `account` ADD CONSTRAINT `account_creatorId_fkey` FOREIGN KEY (`creatorId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `accountMemeber` ADD CONSTRAINT `accountMemeber_accountId_fkey` FOREIGN KEY (`accountId`) REFERENCES `account`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `accountMember` ADD CONSTRAINT `accountMember_accountId_fkey` FOREIGN KEY (`accountId`) REFERENCES `account`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
