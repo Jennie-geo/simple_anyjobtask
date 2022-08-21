@@ -34,16 +34,15 @@ model Account {
   anyTarget Target @default(NO)
   methodofsaving SavingMethod @default (MANUAL)
   savingfrequency SavingFrequency @default(DAILY)
-  whentoStart String?
-  howmuchtosave Int?
+  howmuchtosave Int
   datetostartsaving String?
   savingTimeLength SAVINGTIMELENGTH @default(THREE_MONTHS)
-  
+  invite Invite[]
   creator     User    @relation(fields: [creatorId], references: [id])
   creatorId   Int
   members Member[]
-  startdate String?
-  endDate String?
+  startdate String
+  endDate String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -64,18 +63,19 @@ model Member {
 model Invite {
 
   id Int @id @default(autoincrement()) 
-
   sender     User   @relation(name: "sender", fields: [senderId], references: [id]) 
   receiver   User   @relation(name: "receiver", fields: [receiverId], references: [id])
   senderId   Int @unique
   receiverId Int @unique
+  account Account @relation(fields: [accountId], references: [id])
+  accountId Int
   relationshipWithBuddy String
-  methodofsaving SavingMethod @default (MANUAL)
+  methodofsaving SavingMethod @default(MANUAL)
   savingfrequency SavingFrequency @default(DAILY)
-  whentoStart String?
-  howmuchtosave Int?
+  startdate String
+  howmuchtosave Int
   savingTimeLength SAVINGTIMELENGTH @default(THREE_MONTHS)
-  status Status @default (Rejected)
+  status Status @default(Rejected)
   isPending Boolean @default(false)
 
   @@map("invites")

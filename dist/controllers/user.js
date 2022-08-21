@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendInvite = exports.createAccount = exports.verifyAccount = exports.logginUser = exports.createUser = void 0;
+exports.allUser = exports.sendInvite = exports.createAccount = exports.verifyAccount = exports.logginUser = exports.createUser = void 0;
 const client_1 = require("@prisma/client");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -97,7 +97,6 @@ async function createAccount(req, res) {
                 methodofsaving: methodofsaving,
                 anyTarget: anyTarget,
                 savingfrequency: savingfrequency,
-                whentoStart: whentostart,
                 howmuchtosave: howmuchtosave,
                 datetostartsaving: datetostartsaving,
                 savingTimeLength: savingTimeLength,
@@ -118,18 +117,56 @@ async function sendInvite(req, res) {
             return res.status(401).json({ message: 'Unauthorize' });
         }
         const user = req.user;
-        const invitee = await prisma.user.findUnique({ where: { email: req.body.email } });
+        const invitee = await prisma.user.findUnique({
+            where: {
+                id: req.body.id,
+            },
+        });
         if (!invitee) {
             return res.status(400).json({ success: false, errorMessage: 'This user does not exist', data: [] });
         }
         const account = await prisma.account.findFirst({ where: { creatorId: user.id } });
+        console.log('>>>>> ACOUNT', account);
         if (!account) {
             return res.status(400).json({ success: false, errorMessage: 'You have not created any account', data: [] });
         }
+        const { relationshipWithBuddy } = req.body;
+        const invite = await prisma.invite.create({
+            data: {
+                accountId: account.id,
+                senderId: req.user.id,
+                receiverId: invitee.id,
+                relationshipWithBuddy: relationshipWithBuddy,
+                methodofsaving: account.methodofsaving,
+                savingfrequency: account.savingfrequency,
+                startdate: account.startdate,
+                howmuchtosave: account.howmuchtosave,
+                savingTimeLength: account.savingTimeLength,
+            },
+        });
+        return res.status(200).json({ success: true, successMessage: 'Invite sent successfully', data: invite });
+    }
+    catch (error) {
+        console.log('ERROR', error);
+        return res.status(500).json({ success: false, errorMessage: error.message });
+    }
+}
+exports.sendInvite = sendInvite;
+async function allUser(req, res) {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Unauthorize' });
+        }
+        const user = req.user;
+        const allUsers = await prisma.user.findMany();
+        if (allUser.length < 1) {
+            return res.status(400).json({ success: false, errorMessage: 'No user found', data: [] });
+        }
+        return res.status(200).json({ success: true, successMessage: 'All users sent successfully', data: allUsers });
     }
     catch (error) {
         return res.status(500).json({ success: false, errorMessage: error.message });
     }
 }
-exports.sendInvite = sendInvite;
+exports.allUser = allUser;
 //# sourceMappingURL=user.js.map

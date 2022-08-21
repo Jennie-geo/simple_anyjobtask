@@ -95,7 +95,6 @@ export async function createAccount(req: CustomRequest, res: Response) {
         methodofsaving: methodofsaving,
         anyTarget: anyTarget,
         savingfrequency: savingfrequency,
-        whentoStart: whentostart,
         howmuchtosave: howmuchtosave,
         datetostartsaving: datetostartsaving,
         savingTimeLength: savingTimeLength,
@@ -115,14 +114,51 @@ export async function sendInvite(req: CustomRequest, res: Response) {
       return res.status(401).json({ message: 'Unauthorize' });
     }
     const user = req.user;
-    const invitee = await prisma.user.findUnique({ where: { email: req.body.email } });
+    const invitee = await prisma.user.findUnique({
+      where: {
+        id: req.body.id,
+      },
+    });
     if (!invitee) {
       return res.status(400).json({ success: false, errorMessage: 'This user does not exist', data: [] });
     }
     const account = await prisma.account.findFirst({ where: { creatorId: user.id } });
+    console.log('>>>>> ACOUNT', account);
     if (!account) {
       return res.status(400).json({ success: false, errorMessage: 'You have not created any account', data: [] });
     }
+    const { relationshipWithBuddy } = req.body;
+    const invite = await prisma.invite.create({
+      data: {
+        accountId: account.id,
+        senderId: req.user.id,
+        receiverId: invitee.id,
+        relationshipWithBuddy: relationshipWithBuddy,
+        methodofsaving: account.methodofsaving,
+        savingfrequency: account.savingfrequency,
+        startdate: account.startdate,
+        howmuchtosave: account.howmuchtosave,
+        savingTimeLength: account.savingTimeLength,
+      },
+    });
+    return res.status(200).json({ success: true, successMessage: 'Invite sent successfully', data: invite });
+  } catch (error: any) {
+    console.log('ERROR', error);
+    return res.status(500).json({ success: false, errorMessage: error.message });
+  }
+}
+
+export async function allUser(req: CustomRequest, res: Response) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorize' });
+    }
+    const user = req.user;
+    const allUsers = await prisma.user.findMany();
+    if (allUser.length < 1) {
+      return res.status(400).json({ success: false, errorMessage: 'No user found', data: [] });
+    }
+    return res.status(200).json({ success: true, successMessage: 'All users sent successfully', data: allUsers });
   } catch (error: any) {
     return res.status(500).json({ success: false, errorMessage: error.message });
   }
