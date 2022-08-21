@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createAccount = exports.verifyAccount = exports.logginUser = exports.createUser = void 0;
+exports.sendInvite = exports.createAccount = exports.verifyAccount = exports.logginUser = exports.createUser = void 0;
 const client_1 = require("@prisma/client");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -22,7 +22,7 @@ async function createUser(req, res) {
                 password: hashPassword,
             },
         });
-        return res.status(200).json({ success: true, successMessage: 'user created', data: user });
+        return res.status(201).json({ success: true, successMessage: 'user created', data: user });
     }
     catch (error) {
         return res.status(500).json({ success: false, errormessage: error.message });
@@ -70,7 +70,7 @@ async function verifyAccount(req, res) {
                 verifyAccount: true,
             },
         });
-        return res.status(200).json({ success: true, successMessage: 'You have successfully verified your account, you can proceed to login', data: checkerUser });
+        return res.status(201).json({ success: true, successMessage: 'You have successfully verified your account, you can proceed to login', data: checkerUser });
     }
     catch (error) {
         return res.status(500).json({ success: false, errorMessage: error.message });
@@ -105,11 +105,31 @@ async function createAccount(req, res) {
                 endDate: endDate,
             },
         });
-        return res.status(200).json({ success: true, successMessage: 'Account successfully created', data: createAccount });
+        return res.status(201).json({ success: true, successMessage: 'Account successfully created', data: createAccount });
     }
     catch (error) {
         return res.status(500).json({ success: false, errorMessage: error.message, data: [] });
     }
 }
 exports.createAccount = createAccount;
+async function sendInvite(req, res) {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Unauthorize' });
+        }
+        const user = req.user;
+        const invitee = await prisma.user.findUnique({ where: { email: req.body.email } });
+        if (!invitee) {
+            return res.status(400).json({ success: false, errorMessage: 'This user does not exist', data: [] });
+        }
+        const account = await prisma.account.findFirst({ where: { creatorId: user.id } });
+        if (!account) {
+            return res.status(400).json({ success: false, errorMessage: 'You have not created any account', data: [] });
+        }
+    }
+    catch (error) {
+        return res.status(500).json({ success: false, errorMessage: error.message });
+    }
+}
+exports.sendInvite = sendInvite;
 //# sourceMappingURL=user.js.map

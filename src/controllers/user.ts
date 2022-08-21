@@ -21,7 +21,7 @@ export async function createUser(req: Request, res: Response) {
         password: hashPassword,
       },
     });
-    return res.status(200).json({ success: true, successMessage: 'user created', data: user });
+    return res.status(201).json({ success: true, successMessage: 'user created', data: user });
   } catch (error: any) {
     return res.status(500).json({ success: false, errormessage: error.message });
   }
@@ -68,7 +68,7 @@ export async function verifyAccount(req: CustomRequest, res: Response) {
         verifyAccount: true,
       },
     });
-    return res.status(200).json({ success: true, successMessage: 'You have successfully verified your account, you can proceed to login', data: checkerUser });
+    return res.status(201).json({ success: true, successMessage: 'You have successfully verified your account, you can proceed to login', data: checkerUser });
   } catch (error: any) {
     return res.status(500).json({ success: false, errorMessage: error.message });
   }
@@ -103,8 +103,27 @@ export async function createAccount(req: CustomRequest, res: Response) {
         endDate: endDate,
       },
     });
-    return res.status(200).json({ success: true, successMessage: 'Account successfully created', data: createAccount });
+    return res.status(201).json({ success: true, successMessage: 'Account successfully created', data: createAccount });
   } catch (error: any) {
     return res.status(500).json({ success: false, errorMessage: error.message, data: [] });
+  }
+}
+
+export async function sendInvite(req: CustomRequest, res: Response) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorize' });
+    }
+    const user = req.user;
+    const invitee = await prisma.user.findUnique({ where: { email: req.body.email } });
+    if (!invitee) {
+      return res.status(400).json({ success: false, errorMessage: 'This user does not exist', data: [] });
+    }
+    const account = await prisma.account.findFirst({ where: { creatorId: user.id } });
+    if (!account) {
+      return res.status(400).json({ success: false, errorMessage: 'You have not created any account', data: [] });
+    }
+  } catch (error: any) {
+    return res.status(500).json({ success: false, errorMessage: error.message });
   }
 }

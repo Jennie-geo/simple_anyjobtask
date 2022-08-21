@@ -11,5 +11,6 @@ route.post('/user/signup', user_1.createUser);
 route.post('/user/login', user_1.logginUser);
 route.post('/user/account-verification', user_1.verifyAccount);
 route.post('/user/create-account', authlogin_1.authlogin, user_1.createAccount);
+route.post('/user/send-invite', authlogin_1.authlogin, user_1.sendInvite);
 exports.default = route;
 //# sourceMappingURL=user.js.map

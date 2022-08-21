@@ -16,7 +16,10 @@ model User {
   email String  @unique
   password String
   account Account[]
-  decision Decision @default(REJECTED)
+
+  sender Invite? @relation(name: "sender")
+  receiver Invite? @relation(name: "receiver")
+
   verifyAccount Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -58,14 +61,34 @@ model Member {
   @@map("accountMember")
 }
 
+model Invite {
+
+  id Int @id @default(autoincrement()) 
+
+  sender     User   @relation(name: "sender", fields: [senderId], references: [id]) 
+  receiver   User   @relation(name: "receiver", fields: [receiverId], references: [id])
+  senderId   Int @unique
+  receiverId Int @unique
+  relationshipWithBuddy String
+  methodofsaving SavingMethod @default (MANUAL)
+  savingfrequency SavingFrequency @default(DAILY)
+  whentoStart String?
+  howmuchtosave Int?
+  savingTimeLength SAVINGTIMELENGTH @default(THREE_MONTHS)
+  status Status @default (Rejected)
+  isPending Boolean @default(false)
+
+  @@map("invites")
+}
+
 enum UserRole {
   ISADMIN
   USER
 }
 
-enum Decision {
+enum Status {
   ACCEPTED
-  REJECTED 
+  Rejected
 }
 
 enum Target {
