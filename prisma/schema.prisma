@@ -26,20 +26,21 @@ model User {
 
 model Account {
   id Int @id @default(autoincrement())
-  title String
-  anyTarget Target @default(YES)
+  title String?
+  numberofbuddy Int?
+  anyTarget Target @default(NO)
   methodofsaving SavingMethod @default (MANUAL)
   savingfrequency SavingFrequency @default(DAILY)
-  whentoStart DateTime
-  howmuchtosave Int
-  datetostartsaving DateTime
+  whentoStart String?
+  howmuchtosave Int?
+  datetostartsaving String?
   savingTimeLength SAVINGTIMELENGTH @default(THREE_MONTHS)
   
   creator     User    @relation(fields: [creatorId], references: [id])
   creatorId   Int
   members Member[]
-  startdate DateTime
-  endDate DateTime
+  startdate String?
+  endDate String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -56,18 +57,6 @@ model Member {
 
   @@map("accountMember")
 }
-
-// model Invite {
-//   createdAt DateTime @default(now())
-//   roles UserRole
-
-//   userId Int
-//   user User @relation(fields: [userId], references: [id]) 
-//   accountMemberId Int
-//   account AccountMember @relation(fields: [accountMemberId], references: [id]) 
-
-//   @@id([userId, accountMemberId])
-// }
 
 enum UserRole {
   ISADMIN
