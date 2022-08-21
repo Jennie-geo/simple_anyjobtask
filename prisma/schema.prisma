@@ -76,7 +76,7 @@ model Invite {
   howmuchtosave Int
   savingTimeLength SAVINGTIMELENGTH @default(THREE_MONTHS)
   status Status @default(Rejected)
-  isPending Boolean @default(false)
+  isPending Boolean @default(true)
 
   @@map("invites")
 }

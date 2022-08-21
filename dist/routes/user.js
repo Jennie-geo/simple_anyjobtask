@@ -13,5 +13,8 @@ route.post('/user/account-verification', user_1.verifyAccount);
 route.post('/user/create-account', authlogin_1.authlogin, user_1.createAccount);
 route.post('/user/send-invite', authlogin_1.authlogin, user_1.sendInvite);
 route.get('/user/getallusers', authlogin_1.authlogin, user_1.allUser);
+route.post('/user/accept-invite', authlogin_1.authlogin, user_1.acceptInvite);
+route.post('/user/accept-invite', authlogin_1.authlogin, user_1.acceptInvite);
+route.post('/user/reject-invite', authlogin_1.authlogin, user_1.rejectInvite);
 exports.default = route;
 //# sourceMappingURL=user.js.map

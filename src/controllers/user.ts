@@ -21,9 +21,13 @@ export async function createUser(req: Request, res: Response) {
         password: hashPassword,
       },
     });
-    return res.status(201).json({ success: true, successMessage: 'user created', data: user });
+    return res
+      .status(201)
+      .json({ success: true, successMessage: 'user created', data: user });
   } catch (error: any) {
-    return res.status(500).json({ success: false, errormessage: error.message });
+    return res
+      .status(500)
+      .json({ success: false, errormessage: error.message });
   }
 }
 
@@ -35,18 +39,36 @@ export async function logginUser(req: Request, res: Response) {
       },
     });
     if (!user) {
-      return res.status(400).json({ success: false, errorMessage: 'This email does not exist', data: [] });
+      return res.status(400).json({
+        success: false,
+        errorMessage: 'This email does not exist',
+        data: [],
+      });
     }
     if (user.verifyAccount !== true) {
-      return res.status(400).json({ success: false, errorMessage: 'You have to verify your account to continue' });
+      return res.status(400).json({
+        success: false,
+        errorMessage: 'You have to verify your account to continue',
+      });
     }
-    const matchedPassword = await bcrypt.compare(req.body.password, user.password);
+    const matchedPassword = await bcrypt.compare(
+      req.body.password,
+      user.password
+    );
     if (!matchedPassword) {
-      return res.status(400).json({ success: false, errorMessage: 'Password does not match', data: [] });
+      return res.status(400).json({
+        success: false,
+        errorMessage: 'Password does not match',
+        data: [],
+      });
     }
-    const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET as string, {
-      expiresIn: '2h',
-    });
+    const token = jwt.sign(
+      { email: user.email },
+      process.env.JWT_SECRET as string,
+      {
+        expiresIn: '2h',
+      }
+    );
 
     return res.status(200).json({
       success: true,
@@ -54,7 +76,9 @@ export async function logginUser(req: Request, res: Response) {
       token: token,
     });
   } catch (error: any) {
-    return res.status(500).json({ success: false, errorMessage: error.message });
+    return res
+      .status(500)
+      .json({ success: false, errorMessage: error.message });
   }
 }
 
@@ -68,9 +92,16 @@ export async function verifyAccount(req: CustomRequest, res: Response) {
         verifyAccount: true,
       },
     });
-    return res.status(201).json({ success: true, successMessage: 'You have successfully verified your account, you can proceed to login', data: checkerUser });
+    return res.status(201).json({
+      success: true,
+      successMessage:
+        'You have successfully verified your account, you can proceed to login',
+      data: checkerUser,
+    });
   } catch (error: any) {
-    return res.status(500).json({ success: false, errorMessage: error.message });
+    return res
+      .status(500)
+      .json({ success: false, errorMessage: error.message });
   }
 }
 
@@ -80,11 +111,25 @@ export async function createAccount(req: CustomRequest, res: Response) {
       return res.status(401).json({ message: 'Unauthorize' });
     }
     const user = req.user;
-    const { title, numberofbuddy, anyTarget, methodofsaving, savingfrequency, whentostart, howmuchtosave, datetostartsaving, savingTimeLength, startdate, endDate } = req.body;
+    const {
+      title,
+      numberofbuddy,
+      anyTarget,
+      methodofsaving,
+      savingfrequency,
+      whentostart,
+      howmuchtosave,
+      datetostartsaving,
+      savingTimeLength,
+      startdate,
+      endDate,
+    } = req.body;
 
     const getUser = await prisma.user.findUnique({ where: { id: user.id } });
     if (!getUser) {
-      return res.status(400).json({ success: false, errorMessage: 'No user found', data: [] });
+      return res
+        .status(400)
+        .json({ success: false, errorMessage: 'No user found', data: [] });
     }
     console.log('USER', getUser);
     const createAccount = await prisma.account.create({
@@ -102,9 +147,15 @@ export async function createAccount(req: CustomRequest, res: Response) {
         endDate: endDate,
       },
     });
-    return res.status(201).json({ success: true, successMessage: 'Account successfully created', data: createAccount });
+    return res.status(201).json({
+      success: true,
+      successMessage: 'Account successfully created',
+      data: createAccount,
+    });
   } catch (error: any) {
-    return res.status(500).json({ success: false, errorMessage: error.message, data: [] });
+    return res
+      .status(500)
+      .json({ success: false, errorMessage: error.message, data: [] });
   }
 }
 
@@ -120,12 +171,22 @@ export async function sendInvite(req: CustomRequest, res: Response) {
       },
     });
     if (!invitee) {
-      return res.status(400).json({ success: false, errorMessage: 'This user does not exist', data: [] });
+      return res.status(400).json({
+        success: false,
+        errorMessage: 'This user does not exist',
+        data: [],
+      });
     }
-    const account = await prisma.account.findFirst({ where: { creatorId: user.id } });
+    const account = await prisma.account.findFirst({
+      where: { creatorId: user.id },
+    });
     console.log('>>>>> ACOUNT', account);
     if (!account) {
-      return res.status(400).json({ success: false, errorMessage: 'You have not created any account', data: [] });
+      return res.status(400).json({
+        success: false,
+        errorMessage: 'You have not created any account',
+        data: [],
+      });
     }
     const { relationshipWithBuddy } = req.body;
     const invite = await prisma.invite.create({
@@ -141,10 +202,16 @@ export async function sendInvite(req: CustomRequest, res: Response) {
         savingTimeLength: account.savingTimeLength,
       },
     });
-    return res.status(200).json({ success: true, successMessage: 'Invite sent successfully', data: invite });
+    return res.status(200).json({
+      success: true,
+      successMessage: 'Invite sent successfully',
+      data: invite,
+    });
   } catch (error: any) {
     console.log('ERROR', error);
-    return res.status(500).json({ success: false, errorMessage: error.message });
+    return res
+      .status(500)
+      .json({ success: false, errorMessage: error.message });
   }
 }
 
@@ -156,10 +223,83 @@ export async function allUser(req: CustomRequest, res: Response) {
     const user = req.user;
     const allUsers = await prisma.user.findMany();
     if (allUser.length < 1) {
-      return res.status(400).json({ success: false, errorMessage: 'No user found', data: [] });
+      return res
+        .status(400)
+        .json({ success: false, errorMessage: 'No user found', data: [] });
     }
-    return res.status(200).json({ success: true, successMessage: 'All users sent successfully', data: allUsers });
+    return res.status(200).json({
+      success: true,
+      successMessage: 'All users sent successfully',
+      data: allUsers,
+    });
   } catch (error: any) {
-    return res.status(500).json({ success: false, errorMessage: error.message });
+    return res
+      .status(500)
+      .json({ success: false, errorMessage: error.message });
+  }
+}
+
+export async function acceptInvite(req: CustomRequest, res: Response) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorize' });
+    }
+    const user = req.user;
+    const userInvite = await prisma.invite.update({
+      where: {
+        receiverId: user.id,
+      },
+      data: {
+        status: 'ACCEPTED',
+        isPending: false,
+      },
+    });
+    return res.status(200).json({
+      success: true,
+      successMessage: 'Invite accepted',
+      data: userInvite,
+    });
+  } catch (error: any) {
+    return res
+      .status(500)
+      .json({ success: false, errorMessage: error.message, data: [] });
+  }
+}
+
+export async function rejectInvite(req: CustomRequest, res: Response) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorize' });
+    }
+    const user = req.user;
+    const userInvite = await prisma.invite.update({
+      where: {
+        receiverId: user.id,
+      },
+      data: {
+        isPending: false,
+      },
+    });
+    if (!userInvite) {
+      return res
+        .status(400)
+        .json({ success: false, errorMessage: 'No invite found', data: [] });
+    }
+    if (userInvite.status === 'ACCEPTED') {
+      return res.status(400).json({
+        success: false,
+        errorMessage: 'you have no invite to accept',
+        data: [],
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      successMessage: 'Invite reject',
+      data: userInvite,
+    });
+  } catch (error: any) {
+    return res
+      .status(500)
+      .json({ success: false, errorMessage: error.message, data: [] });
   }
 }
