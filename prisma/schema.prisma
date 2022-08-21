@@ -15,7 +15,8 @@ model User {
   lastName String
   email String  @unique
   password String
-  account Invite[]
+  //account Invite[]
+  account Account[]
   decision Decision @default(REJECTED)
   verifyAccount Boolean @default(false)
   createdAt DateTime @default(now())
@@ -33,26 +34,39 @@ model Account {
   howmuchtosave Int
   datetostartsaving DateTime
   savingTimeLength SAVINGTIMELENGTH @default(THREE_MONTHS)
+  
+  creator     User    @relation(fields: [creatorId], references: [id])
+  creatorId   Int
+  members AccountMember[]
   startdate DateTime
   endDate DateTime
-  relationshipWithBuddy String
-  members Invite[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+   @@map("account")
 }
 
-model Invite {
-  createdAt DateTime @default(now())
-  roles UserRole
-
-  userId Int
-  user User @relation(fields: [userId], references: [id]) 
+model AccountMember {
+  id Int @id @default(autoincrement())
+  
+  acount Account @relation(fields: [accountId], references: [id])
   accountId Int
-  account Account @relation(fields: [accountId], references: [id]) 
-
-  @@id([userId, accountId])
+  relationshipWithBuddy String
+  @@map("accountId ")
 }
+
+// model Invite {
+//   createdAt DateTime @default(now())
+//   roles UserRole
+
+//   userId Int
+//   user User @relation(fields: [userId], references: [id]) 
+//   accountMemberId Int
+//   account AccountMember @relation(fields: [accountMemberId], references: [id]) 
+
+//   @@id([userId, accountMemberId])
+// }
 
 enum UserRole {
   ISADMIN

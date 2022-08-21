@@ -3,7 +3,8 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import { userInfo } from 'os';
+import { CustomRequest } from '../middleware/authlogin';
+
 dotenv.config();
 const prisma = new PrismaClient();
 
@@ -52,11 +53,61 @@ export async function logginUser(req: Request, res: Response) {
     return res.status(500).json({ success: false, errorMessage: error.message });
   }
 }
-export async function createAccount(req: Request, res: Response) {
+
+export async function verifyAccount(req: CustomRequest, res: Response) {
   try {
-    const user = await prisma.user.findUnique({
-      where: {},
+    if (!req.user) {
+      return res.status(401).json({ success: false, errorMessage: 'Unauthorize' });
+    }
+    const user = req.user;
+    const checkerUser = await prisma.user.update({
+      where: {
+        email: user.email,
+      },
+      data: {
+        verifyAccount: true,
+      },
     });
+    return res.status(200).json({ success: true, successMessage: 'You have successfully verified your account', data: checkerUser });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, errorMessage: error.message });
+  }
+}
+
+export async function createAccount(req: CustomRequest, res: Response) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorize' });
+    }
+    const date = new Date().toISOString().split('.')[0];
+    const time = date.split('T')[1];
+    console.log('date', date, 'time', time);
+    const user = req.user;
+    const { title, methodofsaving, savingfrequency, whentostart, howmuchtosave, datetostartsaving, savingTimeLength, startdate, endDate } = req.body;
+
+    const getUser = await prisma.user.findUnique({ where: { id: user.id } });
+    if (!getUser) {
+      return res.status(400).json({ success: false, errorMessage: 'No user found', data: [] });
+    }
+    if (getUser.verifyAccount === false) {
+      return res.status(400).json({ success: false, errorMessage: 'Your account has not been verified', data: [] });
+    }
+
+    const createAccount = await prisma.account.create({
+      data: {
+        creatorId: user.id,
+        title: title,
+        methodofsaving: methodofsaving,
+        savingfrequency: savingfrequency,
+        whentoStart: whentostart,
+        howmuchtosave: howmuchtosave,
+        datetostartsaving: datetostartsaving,
+        savingTimeLength: savingTimeLength,
+        startdate: startdate,
+        endDate: endDate,
+      },
+    });
+    return res.status(200).json({ success: true, successMessage: 'Account successfully created', data: createAccount });
   } catch (error: any) {
     return res.status(500).json({ success: false, errorMessage: error.message, data: [] });
   }

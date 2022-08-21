@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createAccount = exports.logginUser = exports.createUser = void 0;
+exports.createAccount = exports.verifyAccount = exports.logginUser = exports.createUser = void 0;
 const client_1 = require("@prisma/client");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -57,11 +57,59 @@ async function logginUser(req, res) {
     }
 }
 exports.logginUser = logginUser;
+async function verifyAccount(req, res) {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ success: false, errorMessage: 'Unauthorize' });
+        }
+        const user = req.user;
+        const checkerUser = await prisma.user.update({
+            where: {
+                email: user.email,
+            },
+            data: {
+                verifyAccount: true,
+            },
+        });
+        return res.status(200).json({ success: true, successMessage: 'You have successfully verified your account', data: checkerUser });
+    }
+    catch (error) {
+        return res.status(500).json({ success: false, errorMessage: error.message });
+    }
+}
+exports.verifyAccount = verifyAccount;
 async function createAccount(req, res) {
     try {
-        const user = await prisma.user.findUnique({
-            where: {},
+        if (!req.user) {
+            return res.status(401).json({ message: 'Unauthorize' });
+        }
+        const date = new Date().toISOString().split('.')[0];
+        const time = date.split('T')[1];
+        console.log('date', date, 'time', time);
+        const user = req.user;
+        const { title, methodofsaving, savingfrequency, whentostart, howmuchtosave, datetostartsaving, savingTimeLength, startdate, endDate } = req.body;
+        const getUser = await prisma.user.findUnique({ where: { id: user.id } });
+        if (!getUser) {
+            return res.status(400).json({ success: false, errorMessage: 'No user found', data: [] });
+        }
+        if (getUser.verifyAccount === false) {
+            return res.status(400).json({ success: false, errorMessage: 'Your account has not been verified', data: [] });
+        }
+        const createAccount = await prisma.account.create({
+            data: {
+                creatorId: user.id,
+                title: title,
+                methodofsaving: methodofsaving,
+                savingfrequency: savingfrequency,
+                whentoStart: whentostart,
+                howmuchtosave: howmuchtosave,
+                datetostartsaving: datetostartsaving,
+                savingTimeLength: savingTimeLength,
+                startdate: startdate,
+                endDate: endDate,
+            },
         });
+        return res.status(200).json({ success: true, successMessage: 'Account successfully created', data: createAccount });
     }
     catch (error) {
         return res.status(500).json({ success: false, errorMessage: error.message, data: [] });
