@@ -50,16 +50,6 @@ model Account {
    @@map("account")
 }
 
-model Member {
-  id Int @id @default(autoincrement())
-  userId Int
-  account Account @relation(fields: [accountId], references: [id])
-  accountId Int
-  relationshipWithBuddy String
-
-  @@map("accountMember")
-}
-
 model Invite {
 
   id Int @id @default(autoincrement()) 
